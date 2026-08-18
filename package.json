@@ -76,6 +76,11 @@
         "command": "seaLionSounds.showOutput",
         "title": "Show Output Log",
         "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.showPet",
+        "title": "Show the Sea Lion Pet",
+        "category": "Sea Lion Sounds"
       }
     ],
     "configuration": {
@@ -111,10 +116,10 @@
         },
         "seaLionSounds.typing.cooldownMs": {
           "type": "number",
-          "default": 60,
+          "default": 40,
           "minimum": 0,
           "maximum": 5000,
-          "markdownDescription": "Minimum delay between typing sounds in milliseconds. Lower values bark more often while typing fast; `60` keeps up with most typists.",
+          "markdownDescription": "Minimum delay between typing sounds in milliseconds. Lower values bark more often while typing fast; `40` keeps up with a quick typist.",
           "order": 12
         },
         "seaLionSounds.typing.sound": {
@@ -130,6 +135,12 @@
           "maximum": 1000,
           "markdownDescription": "Skip the typing sound when a single document change inserts or removes more characters than this. Stops large pastes, formatters and refactors from triggering a sound.",
           "order": 14
+        },
+        "seaLionSounds.typing.inTerminal": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Also play the typing sound while typing in the integrated terminal.\n\n**Off by default, and worth understanding before enabling.** VS Code has no API for terminal keystrokes, so this works by binding letters, digits and space while the terminal is focused, then re-sending the character. Known limits: it does nothing for punctuation (which moves between keyboard layouts), it sends the wrong case when Caps Lock is on, and every affected keypress makes a round trip through the extension host, which can feel slower on a busy window. Turn it off if the terminal ever feels laggy.",
+          "order": 15
         },
         "seaLionSounds.terminal.enabled": {
           "type": "boolean",
@@ -180,6 +191,1035 @@
           "order": 30
         }
       }
+    },
+    "keybindings": [
+      {
+        "key": "a",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "a"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "b",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "b"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "c",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "c"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "d",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "d"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "e",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "e"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "f",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "f"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "g",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "g"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "h",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "h"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "i",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "i"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "j",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "j"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "k",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "k"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "l",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "l"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "m",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "m"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "n",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "n"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "o",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "o"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "p",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "p"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "q",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "q"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "r",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "r"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "s",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "s"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "t",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "t"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "u",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "u"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "v",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "v"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "w",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "w"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "x",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "x"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "y",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "y"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "z",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "z"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+a",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "A"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+b",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "B"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+c",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "C"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+d",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "D"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+e",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "E"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+f",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "F"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+g",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "G"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+h",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "H"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+i",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "I"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+j",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "J"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+k",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "K"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+l",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "L"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+m",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "M"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+n",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "N"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+o",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "O"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+p",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "P"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+q",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "Q"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+r",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "R"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+s",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "S"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+t",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "T"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+u",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "U"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+v",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "V"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+w",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "W"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+x",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "X"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+y",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "Y"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "shift+z",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "Z"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "0",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "0"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "1",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "2",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "3",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "3"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "4",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "4"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "5",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "5"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "6",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "6"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "7",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "7"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "8",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "8"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "9",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "9"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "space",
+        "when": "terminalFocus && !terminalFindVisible && seaLionSounds.terminalTyping",
+        "command": "runCommands",
+        "args": {
+          "commands": [
+            "seaLionSounds.terminalKeystroke",
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": " "
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "seaLionSoundsPanel",
+          "title": "Sea Lion",
+          "icon": "images/seal-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "seaLionSoundsPanel": [
+        {
+          "id": "seaLionSounds.pet",
+          "name": "Sea Lion",
+          "type": "webview",
+          "contextualTitle": "Sea Lion"
+        }
+      ]
     }
   },
   "scripts": {
@@ -193,7 +1233,9 @@
     "sounds": "node scripts/generate-sounds.js",
     "icon": "node scripts/generate-icon.js",
     "package": "npm run vscode:prepublish && vsce package",
-    "publish": "vsce publish"
+    "publish": "vsce publish",
+    "keybindings": "node scripts/generate-keybindings.js",
+    "trim-typing": "node scripts/trim-typing.js"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

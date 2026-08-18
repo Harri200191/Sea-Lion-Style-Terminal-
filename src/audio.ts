@@ -9,6 +9,8 @@ export interface AudioBackend {
   readonly name: string;
   /** Fire and forget. `volume` is already clamped to 0..1. */
   play(file: string, volume: number): void;
+  /** Warms up a sound so the first play is not slowed by opening it. */
+  preload(file: string): void;
   dispose(): void;
 }
 
@@ -31,6 +33,12 @@ interface VoicePool {
   readonly aliases: readonly string[];
   /** Round-robin cursor into `aliases`. */
   next: number;
+  /**
+   * Volume last applied to each device, so a repeated keystroke sends one
+   * command instead of two. Shaving a command off matters when this runs on
+   * every keypress.
+   */
+  readonly levels: number[];
 }
 
 /**
@@ -54,10 +62,11 @@ export class WindowsMciBackend implements AudioBackend {
 
   /**
    * Devices opened per sound. MCI ignores a `play` on a device that is already
-   * playing, so retriggering needs a spare device rather than a rewind. Four
-   * covers a 100 ms sound retriggered every 25 ms.
+   * playing, so retriggering needs a spare device rather than a rewind. Six
+   * covers a 130 ms sound retriggered every 20 ms; keep typing samples short
+   * (see scripts/trim-typing.js) rather than raising this much further.
    */
-  private static readonly VOICES_PER_SOUND = 4;
+  private static readonly VOICES_PER_SOUND = 6;
   private static readonly MAX_OPEN_FILES = 4;
   private static readonly MAX_RESTARTS = 3;
 
@@ -70,12 +79,19 @@ export class WindowsMciBackend implements AudioBackend {
     }
 
     const pool = this.poolFor(file, worker);
-    const alias = pool.aliases[pool.next];
-    pool.next = (pool.next + 1) % pool.aliases.length;
+    const voice = pool.next;
+    const alias = pool.aliases[voice];
+    pool.next = (voice + 1) % pool.aliases.length;
 
     // MCI volume is 0..1000.
     const level = Math.round(volume * 1000);
-    this.send(worker, `M('setaudio ${alias} volume to ${level}'); M('play ${alias} from 0')`);
+    const play = `M('play ${alias} from 0')`;
+    if (pool.levels[voice] === level) {
+      this.send(worker, play);
+    } else {
+      pool.levels[voice] = level;
+      this.send(worker, `M('setaudio ${alias} volume to ${level}'); ${play}`);
+    }
   }
 
   private poolFor(file: string, worker: ChildProcess): VoicePool {
@@ -105,9 +121,16 @@ export class WindowsMciBackend implements AudioBackend {
       this.send(worker, `M('open "${escapeForPowerShell(file)}" type mpegvideo alias ${alias}')`);
     }
 
-    const pool: VoicePool = { aliases, next: 0 };
+    const pool: VoicePool = { aliases, next: 0, levels: new Array<number>(aliases.length).fill(-1) };
     this.pools.set(file, pool);
     return pool;
+  }
+
+  preload(file: string): void {
+    const worker = this.ensureProcess();
+    if (worker?.stdin?.writable) {
+      this.poolFor(file, worker);
+    }
   }
 
   private ensureProcess(): ChildProcess | undefined {
@@ -283,6 +306,10 @@ export class SpawnBackend implements AudioBackend {
     this.launch(candidate, file, volume);
   }
 
+  preload(): void {
+    // Nothing to warm up: these players are spawned fresh for every sound.
+  }
+
   private pick(file: string): PlayerCandidate | undefined {
     const extension = extensionOf(file);
     return this.candidates.find(
@@ -381,6 +408,23 @@ export class AudioPlayer {
       this.backend.play(file, Math.min(1, Math.max(0, volume)));
     } catch (error) {
       this.logger.error(`Could not play "${file}".`, error);
+    }
+  }
+
+  /** Opens sounds ahead of time so the first keystroke is not the slow one. */
+  preload(files: readonly (string | undefined)[]): void {
+    if (this.disposed) {
+      return;
+    }
+    try {
+      this.backend ??= this.backendFactory();
+      for (const file of files) {
+        if (file) {
+          this.backend.preload(file);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Could not preload sounds.', error);
     }
   }
 

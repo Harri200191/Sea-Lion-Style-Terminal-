@@ -210,6 +210,28 @@ function failureSound() {
 const mediaDir = path.join(__dirname, '..', 'media');
 fs.mkdirSync(mediaDir, { recursive: true });
 
+const force = process.argv.includes('--force');
+
+/**
+ * These are placeholders. Once real recordings are dropped in, regenerating
+ * would destroy them, so refuse unless explicitly forced.
+ */
+function isOurs(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return true;
+  }
+  // Everything this script writes is mono; a real recording is usually stereo,
+  // and is in any case much longer than the short placeholders.
+  try {
+    const head = fs.readFileSync(filePath).subarray(0, 44);
+    const channels = head.readUInt16LE(22);
+    const bytes = fs.statSync(filePath).size;
+    return channels === 1 && bytes < 120000;
+  } catch {
+    return true;
+  }
+}
+
 const jobs = [
   ['typing.wav', typingSound(), 0.6],
   ['success.wav', successSound(), 0.9],
@@ -218,6 +240,10 @@ const jobs = [
 
 for (const [name, samples, peak] of jobs) {
   const target = path.join(mediaDir, name);
+  if (!force && !isOurs(target)) {
+    console.log(`skipped media/${name} -- looks like your own recording. Use --force to overwrite.`);
+    continue;
+  }
   const bytes = writeWav(target, samples, peak);
   const ms = Math.round((samples.length / SAMPLE_RATE) * 1000);
   console.log(`wrote media/${name.padEnd(12)} ${String(ms).padStart(4)} ms  ${bytes} bytes`);

@@ -11,6 +11,7 @@ export interface TypingConfig {
   readonly cooldownMs: number;
   readonly sound: string;
   readonly maxChangedCharacters: number;
+  readonly inTerminal: boolean;
 }
 
 export interface TerminalConfig {
@@ -61,9 +62,10 @@ export function readConfiguration(
     typing: {
       enabled: bool(get('typing.enabled'), true),
       volume: clampNumber(get('typing.volume'), 0.35, 0, 1),
-      cooldownMs: clampNumber(get('typing.cooldownMs'), 60, 0, 5000),
+      cooldownMs: clampNumber(get('typing.cooldownMs'), 40, 0, 5000),
       sound: str(get('typing.sound')),
-      maxChangedCharacters: clampNumber(get('typing.maxChangedCharacters'), 12, 1, 1000)
+      maxChangedCharacters: clampNumber(get('typing.maxChangedCharacters'), 12, 1, 1000),
+      inTerminal: bool(get('typing.inTerminal'), false)
     },
     terminal: {
       enabled: bool(get('terminal.enabled'), true),
@@ -92,6 +94,14 @@ export function shouldPlay(config: SeaLionConfig, kind: SoundKind): boolean {
     return false;
   }
   return kind === 'typing' ? config.typing.enabled : config.terminal.enabled;
+}
+
+/**
+ * Whether the terminal keystroke keybindings should be active. Drives a context
+ * key, so when this is false VS Code never routes terminal keys through us.
+ */
+export function terminalTypingActive(config: SeaLionConfig): boolean {
+  return config.enabled && config.typing.enabled && config.typing.inTerminal;
 }
 
 /** The user-configured override path for a kind, or `''` to use the bundled sound. */

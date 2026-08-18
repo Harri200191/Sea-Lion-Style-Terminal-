@@ -12,6 +12,7 @@ A short bark while you type. A cheerful double-bark when a terminal command succ
 - 🎵 **Custom MP3/WAV support** — swap in any sound you like, per category.
 - 🔊 **Configurable volume** — a master volume plus independent per-category volumes.
 - 🖥️ **Cross-platform** — Windows, macOS and Linux.
+- 🦭 **A sea lion pet** — lives in the panel, galumphs around on its own, falls asleep when clicked, and can be dragged anywhere.
 - 🪶 **Lightweight** — zero runtime dependencies, no filesystem polling, and no process-per-keystroke.
 
 ## Installation
@@ -23,6 +24,17 @@ A short bark while you type. A cheerful double-bark when a terminal command succ
 5. Enjoy sea lions.
 
 The status bar shows `🦭 Sea Lions: ON`. Click it to toggle the colony on and off.
+
+## The pet
+
+Open the **Sea Lion** tab in the bottom panel, next to Terminal and Problems, or run `Sea Lion Sounds: Show the Sea Lion Pet`.
+
+- It **galumphs** to random spots on its own, turning to face where it is going.
+- **Click it** and it curls up and falls asleep, with little `z`s drifting off. Click again to wake it — waking earns a bark.
+- **Drag it** anywhere in the panel. It stays where you drop it, then carries on wandering.
+- It remembers where it was and whether it was asleep, and stays inside the panel when you resize.
+
+A note on why it lives there: VS Code extensions cannot draw over the editor or the desktop, so a pet has to live inside a webview. The panel gives it a wide strip to roam while staying visible next to your terminal. Drag the panel taller if you want it to have more room.
 
 ## Requirements
 
@@ -58,6 +70,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type "Sea Lion":
 | `Sea Lion Sounds: Test Failure Sound` | Plays the failure sound immediately. |
 | `Sea Lion Sounds: Open Settings` | Jumps to the extension's settings. |
 | `Sea Lion Sounds: Show Output Log` | Opens the **Sea Lion Sounds** output channel. |
+| `Sea Lion Sounds: Show the Sea Lion Pet` | Reveals the pet in the bottom panel. |
 
 The three test commands play even when the corresponding sound is switched off, so you can audition a file before enabling it.
 
@@ -71,9 +84,10 @@ All volumes are `0`–`1`. Effective loudness is always `masterVolume × categor
 | `seaLionSounds.masterVolume` | number | `0.5` | Master volume for all Sea Lion Sounds. Multiplied into every individual volume. |
 | `seaLionSounds.typing.enabled` | boolean | `true` | Play a sound while typing in the editor. |
 | `seaLionSounds.typing.volume` | number | `0.35` | Volume of the typing sound. |
-| `seaLionSounds.typing.cooldownMs` | number | `60` | Minimum delay between typing sounds in milliseconds. Lower it further for an even busier colony. |
+| `seaLionSounds.typing.cooldownMs` | number | `40` | Minimum delay between typing sounds in milliseconds. Lower it further for an even busier colony. |
 | `seaLionSounds.typing.sound` | string | `""` | Absolute path to a custom typing sound. Empty uses the bundled sound. |
 | `seaLionSounds.typing.maxChangedCharacters` | number | `12` | Skip the typing sound when one change touches more characters than this. Stops pastes and formatters from barking. |
+| `seaLionSounds.typing.inTerminal` | boolean | `false` | Also bark while typing in the integrated terminal. See the caveats below. |
 | `seaLionSounds.terminal.enabled` | boolean | `true` | Play sounds when integrated terminal commands finish. |
 | `seaLionSounds.terminal.volume` | number | `0.8` | Volume of the success and failure sounds. |
 | `seaLionSounds.terminal.successSound` | string | `""` | Absolute path to a custom success sound. Empty uses the bundled sound. |
@@ -84,6 +98,26 @@ All volumes are `0`–`1`. Effective loudness is always `masterVolume × categor
 ### About `terminal.unknownExitCode`
 
 VS Code reports `undefined` instead of an exit code when you press `Ctrl+C`, press Enter at an empty prompt, or when a sub-shell confuses the shell integration script. Barking every time you tap Enter gets old fast, so the default is `ignore`. Set it to `failure` if you want cancelled commands to sound sad.
+
+### Typing sounds in the terminal
+
+Off by default, and worth reading before you switch it on:
+
+```jsonc
+{ "seaLionSounds.typing.inTerminal": true }
+```
+
+VS Code exposes **no API for terminal keystrokes**. `TerminalShellExecution.read()` only gives you a command's output after it has been submitted, and `onDidWriteTerminalData` is still proposed API, which cannot be published to the Marketplace. So the only way to do this is to bind the keys ourselves while the terminal is focused, play the bark, and re-send the character.
+
+That means real limitations:
+
+- **Letters, digits and space only.** Punctuation moves around between keyboard layouts, so re-sending it reliably is not possible. Those keys stay silent and are never intercepted.
+- **Caps Lock sends the wrong case.** Keybindings match the key, not the character it produces.
+- **Every affected keypress makes a round trip through the extension host.** On a busy window the terminal can feel slightly less responsive.
+
+When the setting is off, the keybindings are disabled by a context key, so VS Code does not route terminal keys through the extension at all — there is zero cost to leaving it off.
+
+If the terminal ever feels laggy, turn it off. Editor typing sounds are unaffected either way.
 
 ### Using your own sounds
 
@@ -104,8 +138,8 @@ You can also just replace the bundled files. Drop `typing.mp3`, `success.mp3` or
 Three small pieces:
 
 - **Typing** listens to `workspace.onDidChangeTextDocument`, not raw keyboard events. It skips undo/redo, skips edits to any document that is not the one you are looking at (which is how formatters, refactors and other extensions are filtered out), skips changes bigger than `maxChangedCharacters`, and then applies a leading-edge throttle. No timers are involved, so a pause always lets the next keystroke through immediately.
-- **Terminal** listens to `window.onDidEndTerminalShellExecution` and reads the real `exitCode`.
-- **Audio** keeps exactly one player alive. On Windows that is a single long-lived PowerShell process driving MCI (`winmm.dll`); each sound is opened as a small pool of four devices and playing costs one short line on stdin. The pool matters: MCI silently ignores a `play` on a device that is still playing, so retriggering a 82 ms typing sound every 60 ms needs a spare device rather than a rewind. On macOS and Linux, short-lived players are spawned per sound with a hard concurrency cap.
+- **Terminal** listens to `window.onDidEndTerminalShellExecution` and reads the real `exitCode`. Optional terminal *typing* sounds work differently, through keybindings, because no keystroke API exists — see above.
+- **Audio** keeps exactly one player alive. On Windows that is a single long-lived PowerShell process driving MCI (`winmm.dll`); each sound is opened as a small pool of four devices and playing costs one short line on stdin. The pool matters: MCI silently ignores a `play` on a device that is still playing, so retriggering an 82 ms typing sound every 40 ms needs a spare device rather than a rewind. All three sounds are opened at activation, so the first bark is as fast as the rest. On macOS and Linux, short-lived players are spawned per sound with a hard concurrency cap.
 
 Everything is logged to the **Sea Lion Sounds** output channel — backend startup, terminal exit codes, bad paths, playback errors. Keystrokes are deliberately not logged.
 
@@ -125,9 +159,13 @@ Press `F5` in VS Code to launch the Extension Development Host with the extensio
 Regenerating the bundled assets:
 
 ```bash
-npm run sounds      # re-synthesise media/*.wav
-npm run icon        # re-render images/icon.png
+npm run sounds       # re-synthesise media/*.wav
+npm run icon         # re-render images/icon.png
+npm run keybindings  # regenerate the terminal keybindings in package.json
+npm run trim-typing  # shorten media/typing.wav to a keystroke-sized bark
 ```
+
+`npm run sounds` refuses to overwrite real recordings; pass `--force` if you really mean it. `npm run trim-typing` keeps a copy of the original as `media/typing.original.wav`.
 
 ### Installing the VSIX locally
 

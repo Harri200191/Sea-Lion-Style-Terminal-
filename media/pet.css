@@ -1,0 +1,134 @@
+:root {
+  --seal-body: #7a5a44;
+  --seal-body-dark: #5c4231;
+  --seal-belly: #a38064;
+  --seal-muzzle: #c4a68c;
+  --seal-dark: #1a202c;
+  --seal-shadow: rgba(0, 0, 0, 0.22);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* The seal is dragged around in here, so never let it scroll. */
+  overflow: hidden;
+  touch-action: none;
+  cursor: default;
+}
+
+#hint {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  opacity: 0.45;
+  font-size: 11px;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.4s ease;
+}
+
+#hint.gone {
+  opacity: 0;
+}
+
+#seal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 78px;
+  height: 56px;
+  /* Positioned with translate so movement stays on the compositor. */
+  will-change: transform;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#seal.dragging {
+  cursor: grabbing;
+}
+
+#seal svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Shadow squashes as the seal humps along, which sells the weight. */
+.shadow {
+  fill: var(--seal-shadow);
+}
+
+.eye-open {
+  display: block;
+}
+
+.eye-shut,
+.zzz {
+  display: none;
+}
+
+/* Class-based rather than id-scoped, so the sleeping state can be previewed. */
+.asleep .eye-open {
+  display: none;
+}
+
+.asleep .eye-shut,
+.asleep .zzz {
+  display: block;
+}
+
+.zzz text {
+  fill: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-weight: 600;
+  opacity: 0;
+  animation: drift 3s ease-out infinite;
+}
+
+.zzz text:nth-child(2) {
+  animation-delay: 1s;
+}
+
+.zzz text:nth-child(3) {
+  animation-delay: 2s;
+}
+
+@keyframes drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.7);
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(10px, -22px) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zzz text {
+    animation: none;
+    opacity: 0.7;
+  }
+}

@@ -6,13 +6,15 @@ import {
   customPathFor,
   readConfiguration,
   shouldPlay,
+  terminalTypingActive,
   volumeFor,
   type SeaLionConfig
 } from './configuration';
 import { OutputChannelLogger, type Logger } from './log';
-import { SoundResolver, type SoundKind } from './sounds';
+import { SeaLionPetProvider } from './pet';
+import { SOUND_KINDS, SoundResolver, type SoundKind } from './sounds';
 import { TerminalListener } from './terminal';
-import { TypingListener } from './typing';
+import { Throttle, TypingListener } from './typing';
 
 /** Volume used by the test commands when the configured volume is zero. */
 const TEST_FALLBACK_VOLUME = 0.6;
@@ -103,12 +105,51 @@ export function activate(context: vscode.ExtensionContext): void {
   const board = new SoundBoard(getConfig, resolver, player);
   const statusBar = new StatusBar();
 
+  // Open every sound up front so the first keystroke is not the slow one.
+  const preload = (): void =>
+    player.preload(SOUND_KINDS.map((kind) => resolver.resolve(kind, customPathFor(config, kind))));
+
+  // One throttle shared by the editor and the terminal: they cannot both have
+  // focus, and sharing stops a focus switch from firing two barks at once.
+  const typingThrottle = new Throttle();
+
   context.subscriptions.push(
     player,
     statusBar,
-    new TypingListener(getConfig, () => board.play('typing')),
+    new TypingListener(getConfig, () => board.play('typing'), typingThrottle),
     new TerminalListener(getConfig, (outcome) => board.play(outcome), logger)
   );
+
+  // Bound to letter/digit/space keys while the terminal is focused. The
+  // keybindings also re-send the character; see scripts/generate-keybindings.js.
+  context.subscriptions.push(
+    vscode.commands.registerCommand('seaLionSounds.terminalKeystroke', () => {
+      const current = getConfig();
+      if (!terminalTypingActive(current)) {
+        return;
+      }
+      if (typingThrottle.tryAcquire(current.typing.cooldownMs)) {
+        board.play('typing');
+      }
+    })
+  );
+
+  // The panel pet. Barks with the typing sound when you wake it up.
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      SeaLionPetProvider.viewType,
+      new SeaLionPetProvider(context.extensionUri, () => board.playForTest('typing'), logger),
+      { webviewOptions: { retainContextWhenHidden: true } }
+    )
+  );
+
+  const syncTerminalTypingContext = (): void => {
+    void vscode.commands.executeCommand(
+      'setContext',
+      'seaLionSounds.terminalTyping',
+      terminalTypingActive(config)
+    );
+  };
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
@@ -119,6 +160,8 @@ export function activate(context: vscode.ExtensionContext): void {
       // Paths may now point somewhere else, so drop the cached lookups.
       resolver.invalidate();
       statusBar.update(config);
+      syncTerminalTypingContext();
+      preload();
       logger.info(`Settings reloaded. Sea Lion Sounds are ${config.enabled ? 'on' : 'off'}.`);
     })
   );
@@ -132,7 +175,9 @@ export function activate(context: vscode.ExtensionContext): void {
     'seaLionSounds.testFailure': () => board.playForTest('failure'),
     'seaLionSounds.openSettings': () =>
       void vscode.commands.executeCommand('workbench.action.openSettings', CONFIG_SECTION),
-    'seaLionSounds.showOutput': () => channel.show(true)
+    'seaLionSounds.showOutput': () => channel.show(true),
+    'seaLionSounds.showPet': () =>
+      void vscode.commands.executeCommand(`${SeaLionPetProvider.viewType}.focus`)
   };
 
   for (const [id, handler] of Object.entries(commands)) {
@@ -148,6 +193,8 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   statusBar.update(config);
+  syncTerminalTypingContext();
+  preload();
   logger.info(`Activated on ${process.platform}. Bundled sounds: ${mediaDir}`);
 }
 

@@ -11,10 +11,15 @@ import { SoundResolver } from '../sounds';
 class MockBackend implements AudioBackend {
   readonly name = 'mock';
   readonly calls: Array<{ file: string; volume: number }> = [];
+  readonly preloaded: string[] = [];
   disposed = false;
 
   play(file: string, volume: number): void {
     this.calls.push({ file, volume });
+  }
+
+  preload(file: string): void {
+    this.preloaded.push(file);
   }
 
   dispose(): void {
@@ -94,6 +99,7 @@ describe('AudioPlayer', () => {
       play: () => {
         throw new Error('no sound card');
       },
+      preload: () => undefined,
       dispose: () => undefined
     }));
 
@@ -119,6 +125,7 @@ describe('AudioPlayer', () => {
     const player = new AudioPlayer(logger, () => ({
       name: 'broken',
       play: () => undefined,
+      preload: () => undefined,
       dispose: () => {
         throw new Error('stuck');
       }
@@ -126,6 +133,51 @@ describe('AudioPlayer', () => {
 
     player.play('/sounds/bark.wav', 0.5);
     assert.doesNotThrow(() => player.dispose());
+    assert.equal(errors.length, 1);
+  });
+});
+
+describe('preloading', () => {
+  it('warms up every sound it is given', () => {
+    const backend = new MockBackend();
+    const player = new AudioPlayer(silentLogger, () => backend);
+
+    player.preload(['/sounds/a.wav', '/sounds/b.wav']);
+
+    assert.deepEqual(backend.preloaded, ['/sounds/a.wav', '/sounds/b.wav']);
+  });
+
+  it('skips sounds that could not be resolved', () => {
+    const backend = new MockBackend();
+    const player = new AudioPlayer(silentLogger, () => backend);
+
+    player.preload([undefined, '/sounds/a.wav', undefined]);
+
+    assert.deepEqual(backend.preloaded, ['/sounds/a.wav']);
+  });
+
+  it('does nothing after dispose', () => {
+    const backend = new MockBackend();
+    const player = new AudioPlayer(silentLogger, () => backend);
+
+    player.dispose();
+    player.preload(['/sounds/a.wav']);
+
+    assert.equal(backend.preloaded.length, 0);
+  });
+
+  it('swallows a backend that throws while preloading', () => {
+    const { logger, errors } = collectingLogger();
+    const player = new AudioPlayer(logger, () => ({
+      name: 'broken',
+      play: () => undefined,
+      preload: () => {
+        throw new Error('cannot open');
+      },
+      dispose: () => undefined
+    }));
+
+    assert.doesNotThrow(() => player.preload(['/sounds/a.wav']));
     assert.equal(errors.length, 1);
   });
 });

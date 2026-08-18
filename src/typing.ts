@@ -79,12 +79,13 @@ export function summarize(
 
 /** Bridges editor change events to a play callback. */
 export class TypingListener implements vscode.Disposable {
-  private readonly throttle = new Throttle();
   private readonly subscription: vscode.Disposable;
 
   constructor(
     private readonly getConfig: () => SeaLionConfig,
-    private readonly play: () => void
+    private readonly play: () => void,
+    // Shared with the terminal keystroke handler so the two cannot double-fire.
+    private readonly throttle: Throttle = new Throttle()
   ) {
     this.subscription = vscode.workspace.onDidChangeTextDocument((event) =>
       this.handleChange(event)

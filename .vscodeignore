@@ -25,6 +25,11 @@ node_modules/**
 # Maintainer docs; end users get README.md and CHANGELOG.md.
 instructions.md
 
+# Backups kept by scripts/trim-typing.js, and alternate takes that the
+# extension does not reference. Delete these lines to ship them.
+media/*.original.wav
+media/failure_2.wav
+
 # Temporary files.
 **/.DS_Store
 **/Thumbs.db

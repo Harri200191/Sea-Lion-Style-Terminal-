@@ -8,6 +8,7 @@ import {
   customPathFor,
   readConfiguration,
   shouldPlay,
+  terminalTypingActive,
   volumeFor,
   type SeaLionConfig
 } from '../configuration';
@@ -27,7 +28,8 @@ describe('configuration loading', () => {
     assert.equal(config.masterVolume, 0.5);
     assert.equal(config.typing.enabled, true);
     assert.equal(config.typing.volume, 0.35);
-    assert.equal(config.typing.cooldownMs, 60);
+    assert.equal(config.typing.cooldownMs, 40);
+    assert.equal(config.typing.inTerminal, false);
     assert.equal(config.typing.maxChangedCharacters, 12);
     assert.equal(config.terminal.enabled, true);
     assert.equal(config.terminal.volume, 0.8);
@@ -120,6 +122,26 @@ describe('enabled and disabled state', () => {
     const noTerminal = read({ 'terminal.enabled': false });
     assert.equal(shouldPlay(noTerminal, 'typing'), true);
     assert.equal(shouldPlay(noTerminal, 'failure'), false);
+  });
+});
+
+describe('terminal typing context key', () => {
+  it('is off unless the user opts in', () => {
+    assert.equal(terminalTypingActive(read()), false);
+  });
+
+  it('is on when opted in', () => {
+    assert.equal(terminalTypingActive(read({ 'typing.inTerminal': true })), true);
+  });
+
+  it('is off when typing sounds are disabled', () => {
+    const config = read({ 'typing.inTerminal': true, 'typing.enabled': false });
+    assert.equal(terminalTypingActive(config), false);
+  });
+
+  it('is off when the extension is disabled', () => {
+    const config = read({ 'typing.inTerminal': true, enabled: false });
+    assert.equal(terminalTypingActive(config), false);
   });
 });
 
