@@ -162,10 +162,12 @@ Regenerating the bundled assets:
 npm run sounds       # re-synthesise media/*.wav
 npm run icon         # re-render images/icon.png
 npm run keybindings  # regenerate the terminal keybindings in package.json
-npm run trim-typing  # shorten media/typing.wav to a keystroke-sized bark
+npm run trim-sounds  # shorten media/*.wav to sensible lengths
 ```
 
-`npm run sounds` refuses to overwrite real recordings; pass `--force` if you really mean it. `npm run trim-typing` keeps a copy of the original as `media/typing.original.wav`.
+`npm run sounds` refuses to overwrite real recordings; pass `--force` if you really mean it.
+
+`npm run trim-sounds` shortens all three to keystroke- and notification-sized clips (typing 130 ms, success 1200 ms, failure 1300 ms), fading the tail so a cut through continuous barking does not sound chopped. Trim one at a custom length with `node scripts/trim-sound.js success 500`. The untouched originals are kept as `media/<name>.original.wav`, and every run re-trims from those, so repeated runs never compound — restore by copying one back.
 
 ### Installing the VSIX locally
 

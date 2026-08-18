@@ -28,8 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A sea lion pet in the bottom panel: it wanders on its own, sleeps when
   clicked, and can be dragged anywhere. Implemented as a webview because
   extensions cannot draw over the editor or the desktop.
-- `scripts/trim-typing.js` to cut a long recording down to a keystroke-sized
-  bark, and a guard so `npm run sounds` never overwrites real recordings.
+- `scripts/trim-sound.js` (`npm run trim-sounds`) to cut long recordings down to
+  usable lengths with a proportional fade-out, always re-trimming from a kept
+  original, plus a guard so `npm run sounds` never overwrites real recordings.
 - `seaLionSounds.typing.inTerminal` (default off) to bark while typing in the
   integrated terminal, implemented with keybindings because VS Code exposes no
   terminal keystroke API. Letters, digits and space only; see the README.

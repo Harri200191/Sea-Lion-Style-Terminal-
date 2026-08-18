@@ -62,6 +62,19 @@ Do not drop in audio ripped from YouTube or a stock library you have not
 licensed. See the "Audio licensing and attribution" section of the main
 [README](../README.md) for suggested sources.
 
+## Trimming
+
+Recordings are usually far too long for this. `npm run trim-sounds` cuts each
+one down (typing 130 ms, success 1200 ms, failure 1300 ms), drops any dead air at
+the head, and fades the tail. Originals are preserved as `<name>.original.wav`
+and every run re-trims from those, so nothing degrades and you can always
+restore by copying one back.
+
+```bash
+npm run trim-sounds                      # all three, default lengths
+node scripts/trim-sound.js success 500   # one, custom length
+```
+
 ## Practical tips
 
 - Keep `typing` **very short** — 60–120 ms. It can fire several times a second.

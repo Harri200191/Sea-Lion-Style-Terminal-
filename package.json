@@ -1235,7 +1235,7 @@
     "package": "npm run vscode:prepublish && vsce package",
     "publish": "vsce publish",
     "keybindings": "node scripts/generate-keybindings.js",
-    "trim-typing": "node scripts/trim-typing.js"
+    "trim-sounds": "node scripts/trim-sound.js"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
