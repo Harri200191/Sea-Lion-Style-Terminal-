@@ -3,7 +3,7 @@
   "displayName": "Sea Lion Sounds",
   "description": "Make VS Code sound like a sea lion colony. Play custom sounds while typing and when terminal commands succeed or fail.",
   "version": "0.1.0",
-  "publisher": "harisrehman",
+  "publisher": "Harri200191",
   "license": "MIT",
   "icon": "images/icon.png",
   "engines": {
