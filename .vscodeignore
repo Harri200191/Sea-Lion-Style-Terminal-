@@ -22,6 +22,9 @@ node_modules/**
 **/*.map
 **/*.ts
 
+# Maintainer docs; end users get README.md and CHANGELOG.md.
+instructions.md
+
 # Temporary files.
 **/.DS_Store
 **/Thumbs.db

@@ -61,7 +61,7 @@ export function readConfiguration(
     typing: {
       enabled: bool(get('typing.enabled'), true),
       volume: clampNumber(get('typing.volume'), 0.35, 0, 1),
-      cooldownMs: clampNumber(get('typing.cooldownMs'), 80, 0, 5000),
+      cooldownMs: clampNumber(get('typing.cooldownMs'), 60, 0, 5000),
       sound: str(get('typing.sound')),
       maxChangedCharacters: clampNumber(get('typing.maxChangedCharacters'), 12, 1, 1000)
     },

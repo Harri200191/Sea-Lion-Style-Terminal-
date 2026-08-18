@@ -5,10 +5,32 @@
       "label": "npm: watch",
       "type": "npm",
       "script": "watch",
-      "problemMatcher": "$esbuild-watch",
       "isBackground": true,
       "group": { "kind": "build", "isDefault": true },
-      "presentation": { "reveal": "never", "group": "watchers" }
+      "presentation": { "reveal": "never", "group": "watchers" },
+      // Defined inline rather than using "$esbuild-watch", which is contributed
+      // by a separate extension. F5 must work on a clean VS Code install.
+      "problemMatcher": {
+        "owner": "esbuild",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": [
+          {
+            "regexp": "^..\\[ERROR\\] (.+)$",
+            "message": 1
+          },
+          {
+            "regexp": "^\\s+(.+):(\\d+):(\\d+)$",
+            "file": 1,
+            "line": 2,
+            "column": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[esbuild\\] build started$",
+          "endsPattern": "^\\[esbuild\\] build finished"
+        }
+      }
     }
   ]
 }

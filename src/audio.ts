@@ -26,26 +26,39 @@ function escapeForPowerShell(file: string): string {
   return file.replace(/'/g, "''");
 }
 
+/** One sound, opened several times so it can overlap with itself. */
+interface VoicePool {
+  readonly aliases: readonly string[];
+  /** Round-robin cursor into `aliases`. */
+  next: number;
+}
+
 /**
  * Windows backend built on MCI (winmm.dll) driven through a single, long-lived
  * PowerShell process.
  *
  * Spawning a player per sound is not viable here: PowerShell takes hundreds of
- * milliseconds to start, so a typing sound every 80 ms would pile up processes
- * faster than they exit. Instead one process is started once, each distinct
- * file is opened once (that is the preload), and replaying afterwards costs a
+ * milliseconds to start, so a typing sound every 60 ms would pile up processes
+ * faster than they exit. Instead one process is started once, each sound is
+ * opened as a small pool of devices (that is the preload), and playing costs a
  * single short line on stdin.
  */
 export class WindowsMciBackend implements AudioBackend {
   readonly name = 'mci';
 
   private process: ChildProcess | undefined;
-  private readonly aliases = new Map<string, string>();
+  private readonly pools = new Map<string, VoicePool>();
   private nextAliasId = 0;
   private restarts = 0;
   private disposed = false;
 
-  private static readonly MAX_OPEN_FILES = 8;
+  /**
+   * Devices opened per sound. MCI ignores a `play` on a device that is already
+   * playing, so retriggering needs a spare device rather than a rewind. Four
+   * covers a 100 ms sound retriggered every 25 ms.
+   */
+  private static readonly VOICES_PER_SOUND = 4;
+  private static readonly MAX_OPEN_FILES = 4;
   private static readonly MAX_RESTARTS = 3;
 
   constructor(private readonly logger: Logger) {}
@@ -56,35 +69,45 @@ export class WindowsMciBackend implements AudioBackend {
       return;
     }
 
-    const alias = this.aliasFor(file, worker);
-    // MCI volume is 0..1000. `play <alias> from 0` restarts a sound that is
-    // already playing, which is exactly the behaviour we want for fast typing.
+    const pool = this.poolFor(file, worker);
+    const alias = pool.aliases[pool.next];
+    pool.next = (pool.next + 1) % pool.aliases.length;
+
+    // MCI volume is 0..1000.
     const level = Math.round(volume * 1000);
     this.send(worker, `M('setaudio ${alias} volume to ${level}'); M('play ${alias} from 0')`);
   }
 
-  private aliasFor(file: string, worker: ChildProcess): string {
-    const existing = this.aliases.get(file);
+  private poolFor(file: string, worker: ChildProcess): VoicePool {
+    const existing = this.pools.get(file);
     if (existing) {
       return existing;
     }
 
-    // Bound how many MCI devices stay open; evict the oldest entry.
-    if (this.aliases.size >= WindowsMciBackend.MAX_OPEN_FILES) {
-      const oldest = this.aliases.keys().next();
+    // Bound how many sounds stay open; evict the oldest and free its devices.
+    if (this.pools.size >= WindowsMciBackend.MAX_OPEN_FILES) {
+      const oldest = this.pools.keys().next();
       if (!oldest.done) {
-        const staleAlias = this.aliases.get(oldest.value);
-        this.aliases.delete(oldest.value);
-        this.send(worker, `M('close ${staleAlias}')`);
+        const stale = this.pools.get(oldest.value);
+        this.pools.delete(oldest.value);
+        for (const alias of stale?.aliases ?? []) {
+          this.send(worker, `M('close ${alias}')`);
+        }
       }
     }
 
-    const alias = `sl${this.nextAliasId++}`;
-    this.aliases.set(file, alias);
-    // `type mpegvideo` routes both WAV and MP3 through the media device, which
-    // -- unlike the default waveaudio device -- supports volume control.
-    this.send(worker, `M('open "${escapeForPowerShell(file)}" type mpegvideo alias ${alias}')`);
-    return alias;
+    const aliases: string[] = [];
+    for (let voice = 0; voice < WindowsMciBackend.VOICES_PER_SOUND; voice++) {
+      const alias = `sl${this.nextAliasId++}`;
+      aliases.push(alias);
+      // `type mpegvideo` routes both WAV and MP3 through the media device,
+      // which -- unlike the default waveaudio device -- supports volume.
+      this.send(worker, `M('open "${escapeForPowerShell(file)}" type mpegvideo alias ${alias}')`);
+    }
+
+    const pool: VoicePool = { aliases, next: 0 };
+    this.pools.set(file, pool);
+    return pool;
   }
 
   private ensureProcess(): ChildProcess | undefined {
@@ -122,7 +145,7 @@ export class WindowsMciBackend implements AudioBackend {
       worker.unref();
 
       this.process = worker;
-      this.aliases.clear();
+      this.pools.clear();
       this.restarts++;
       this.send(worker, BOOTSTRAP);
       this.logger.info(`Audio backend ready (${this.name}).`);
@@ -152,7 +175,7 @@ export class WindowsMciBackend implements AudioBackend {
 
   private forget(): void {
     this.process = undefined;
-    this.aliases.clear();
+    this.pools.clear();
   }
 
   dispose(): void {

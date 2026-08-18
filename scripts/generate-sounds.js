@@ -145,7 +145,7 @@ function buffer(seconds) {
 
 /** A short, high, quiet pup chirp. Deliberately tiny so it can repeat fast. */
 function typingSound() {
-  const out = buffer(0.1);
+  const out = buffer(0.082);
   renderBark(out, {
     start: 0,
     duration: 0.075,

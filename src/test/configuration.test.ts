@@ -27,7 +27,7 @@ describe('configuration loading', () => {
     assert.equal(config.masterVolume, 0.5);
     assert.equal(config.typing.enabled, true);
     assert.equal(config.typing.volume, 0.35);
-    assert.equal(config.typing.cooldownMs, 80);
+    assert.equal(config.typing.cooldownMs, 60);
     assert.equal(config.typing.maxChangedCharacters, 12);
     assert.equal(config.terminal.enabled, true);
     assert.equal(config.terminal.volume, 0.8);

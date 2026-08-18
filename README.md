@@ -71,7 +71,7 @@ All volumes are `0`–`1`. Effective loudness is always `masterVolume × categor
 | `seaLionSounds.masterVolume` | number | `0.5` | Master volume for all Sea Lion Sounds. Multiplied into every individual volume. |
 | `seaLionSounds.typing.enabled` | boolean | `true` | Play a sound while typing in the editor. |
 | `seaLionSounds.typing.volume` | number | `0.35` | Volume of the typing sound. |
-| `seaLionSounds.typing.cooldownMs` | number | `80` | Minimum delay between typing sounds in milliseconds. |
+| `seaLionSounds.typing.cooldownMs` | number | `60` | Minimum delay between typing sounds in milliseconds. Lower it further for an even busier colony. |
 | `seaLionSounds.typing.sound` | string | `""` | Absolute path to a custom typing sound. Empty uses the bundled sound. |
 | `seaLionSounds.typing.maxChangedCharacters` | number | `12` | Skip the typing sound when one change touches more characters than this. Stops pastes and formatters from barking. |
 | `seaLionSounds.terminal.enabled` | boolean | `true` | Play sounds when integrated terminal commands finish. |
@@ -105,7 +105,7 @@ Three small pieces:
 
 - **Typing** listens to `workspace.onDidChangeTextDocument`, not raw keyboard events. It skips undo/redo, skips edits to any document that is not the one you are looking at (which is how formatters, refactors and other extensions are filtered out), skips changes bigger than `maxChangedCharacters`, and then applies a leading-edge throttle. No timers are involved, so a pause always lets the next keystroke through immediately.
 - **Terminal** listens to `window.onDidEndTerminalShellExecution` and reads the real `exitCode`.
-- **Audio** keeps exactly one player alive. On Windows that is a single long-lived PowerShell process driving MCI (`winmm.dll`); each sound file is opened once and replaying it afterwards costs one short line on stdin. On macOS and Linux, short-lived players are spawned per sound with a hard concurrency cap.
+- **Audio** keeps exactly one player alive. On Windows that is a single long-lived PowerShell process driving MCI (`winmm.dll`); each sound is opened as a small pool of four devices and playing costs one short line on stdin. The pool matters: MCI silently ignores a `play` on a device that is still playing, so retriggering a 82 ms typing sound every 60 ms needs a spare device rather than a rewind. On macOS and Linux, short-lived players are spawned per sound with a hard concurrency cap.
 
 Everything is logged to the **Sea Lion Sounds** output channel — backend startup, terminal exit codes, bad paths, playback errors. Keystrokes are deliberately not logged.
 

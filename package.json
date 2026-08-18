@@ -32,6 +32,9 @@
   },
   "homepage": "https://github.com/harisrehman/sea-lion-sounds#readme",
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
       {
@@ -108,10 +111,10 @@
         },
         "seaLionSounds.typing.cooldownMs": {
           "type": "number",
-          "default": 80,
+          "default": 60,
           "minimum": 0,
           "maximum": 5000,
-          "markdownDescription": "Minimum delay between typing sounds in milliseconds. Lower values bark more often while typing fast; `80` is a good balance.",
+          "markdownDescription": "Minimum delay between typing sounds in milliseconds. Lower values bark more often while typing fast; `60` keeps up with most typists.",
           "order": 12
         },
         "seaLionSounds.typing.sound": {
