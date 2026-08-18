@@ -1,0 +1,206 @@
+{
+  "name": "sea-lion-sounds",
+  "displayName": "Sea Lion Sounds",
+  "description": "Make VS Code sound like a sea lion colony. Play custom sounds while typing and when terminal commands succeed or fail.",
+  "version": "0.1.0",
+  "publisher": "harisrehman",
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.93.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "sound",
+    "audio",
+    "typing",
+    "terminal",
+    "sea lion"
+  ],
+  "galleryBanner": {
+    "color": "#0B3C5D",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/harisrehman/sea-lion-sounds.git"
+  },
+  "bugs": {
+    "url": "https://github.com/harisrehman/sea-lion-sounds/issues"
+  },
+  "homepage": "https://github.com/harisrehman/sea-lion-sounds#readme",
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "seaLionSounds.enable",
+        "title": "Enable",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.disable",
+        "title": "Disable",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.toggle",
+        "title": "Toggle",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.testTyping",
+        "title": "Test Typing Sound",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.testSuccess",
+        "title": "Test Success Sound",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.testFailure",
+        "title": "Test Failure Sound",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.openSettings",
+        "title": "Open Settings",
+        "category": "Sea Lion Sounds"
+      },
+      {
+        "command": "seaLionSounds.showOutput",
+        "title": "Show Output Log",
+        "category": "Sea Lion Sounds"
+      }
+    ],
+    "configuration": {
+      "title": "Sea Lion Sounds",
+      "properties": {
+        "seaLionSounds.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable Sea Lion Sounds. When off, the colony goes quiet and no sounds are played at all.",
+          "order": 1
+        },
+        "seaLionSounds.masterVolume": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "Master volume for all Sea Lion Sounds, from `0` (silent) to `1` (loudest). Every individual sound volume is multiplied by this value.",
+          "order": 2
+        },
+        "seaLionSounds.typing.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Play a sound while typing in the editor.",
+          "order": 10
+        },
+        "seaLionSounds.typing.volume": {
+          "type": "number",
+          "default": 0.35,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "Volume of the typing sound, from `0` to `1`. Multiplied by `#seaLionSounds.masterVolume#`.",
+          "order": 11
+        },
+        "seaLionSounds.typing.cooldownMs": {
+          "type": "number",
+          "default": 80,
+          "minimum": 0,
+          "maximum": 5000,
+          "markdownDescription": "Minimum delay between typing sounds in milliseconds. Lower values bark more often while typing fast; `80` is a good balance.",
+          "order": 12
+        },
+        "seaLionSounds.typing.sound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to a custom `.mp3` or `.wav` file for the typing sound. Leave empty to use the bundled sound.",
+          "order": 13
+        },
+        "seaLionSounds.typing.maxChangedCharacters": {
+          "type": "number",
+          "default": 12,
+          "minimum": 1,
+          "maximum": 1000,
+          "markdownDescription": "Skip the typing sound when a single document change inserts or removes more characters than this. Stops large pastes, formatters and refactors from triggering a sound.",
+          "order": 14
+        },
+        "seaLionSounds.terminal.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Play sounds when integrated terminal commands finish. Requires [shell integration](https://code.visualstudio.com/docs/terminal/shell-integration) to be active.",
+          "order": 20
+        },
+        "seaLionSounds.terminal.volume": {
+          "type": "number",
+          "default": 0.8,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "Volume of the terminal success and failure sounds, from `0` to `1`. Multiplied by `#seaLionSounds.masterVolume#`.",
+          "order": 21
+        },
+        "seaLionSounds.terminal.successSound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to a custom `.mp3` or `.wav` file played when a terminal command exits with code `0`. Leave empty to use the bundled sound.",
+          "order": 22
+        },
+        "seaLionSounds.terminal.failureSound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to a custom `.mp3` or `.wav` file played when a terminal command exits with a non-zero code. Leave empty to use the bundled sound.",
+          "order": 23
+        },
+        "seaLionSounds.terminal.unknownExitCode": {
+          "type": "string",
+          "enum": [
+            "ignore",
+            "success",
+            "failure"
+          ],
+          "enumDescriptions": [
+            "Play nothing (recommended).",
+            "Play the success sound.",
+            "Play the failure sound."
+          ],
+          "default": "ignore",
+          "markdownDescription": "What to play when the shell reports no exit code. This happens when you press Enter on an empty prompt or cancel a command with `Ctrl+C`.",
+          "order": 24
+        },
+        "seaLionSounds.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show the Sea Lion Sounds toggle in the status bar.",
+          "order": 30
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile": "npm run check-types && node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "check-types": "tsc --noEmit -p tsconfig.json",
+    "compile-tests": "tsc -p tsconfig.test.json",
+    "lint": "eslint src --ext .ts",
+    "test": "npm run compile-tests && node --test \"out-test/test/*.test.js\"",
+    "sounds": "node scripts/generate-sounds.js",
+    "icon": "node scripts/generate-icon.js",
+    "package": "npm run vscode:prepublish && vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/vscode": "^1.93.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.2",
+    "eslint": "^8.57.1",
+    "typescript": "^5.7.2"
+  }
+}

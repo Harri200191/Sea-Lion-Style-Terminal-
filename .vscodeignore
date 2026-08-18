@@ -1,0 +1,30 @@
+# Everything by default is included; this file removes development artifacts.
+.vscode/**
+.vscode-test/**
+.github/**
+.git/**
+.gitignore
+.eslintrc.json
+
+# Sources and intermediate build output (dist/extension.js is the shipped bundle).
+src/**
+out/**
+out-test/**
+scripts/**
+tsconfig.json
+tsconfig.test.json
+esbuild.js
+
+# Bundled by esbuild into dist/extension.js, so never ship the tree.
+node_modules/**
+
+# Source maps are not needed by end users.
+**/*.map
+**/*.ts
+
+# Temporary files.
+**/.DS_Store
+**/Thumbs.db
+*.vsix
+
+# Keep: dist/extension.js, media/*, images/*, README.md, CHANGELOG.md, LICENSE, package.json
